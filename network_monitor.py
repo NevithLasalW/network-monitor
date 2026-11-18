@@ -4,12 +4,22 @@ import time
 import platform
 from concurrent.futures import ThreadPoolExecutor
 import argparse
+import csv
 
 previous_states = {}
+LOG_FILE = "netowork_log.csv"
 
 def send_webhook_alert(host,is_up):
     status_text = "DOWN" if not is_up else "UP"
     print(f" [ALERT] Target {host} status changed. New state: {status_text}")
+
+def log_to_csv(timestamp, host, status):
+    try:
+        with open(LOG_FILE, mode="a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([timestamp, host, status])
+    except Exception as e:
+        print(f"! Error writing to CSV: {e}")
 
 def ping(host):
 

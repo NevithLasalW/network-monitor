@@ -3,6 +3,7 @@ import datetime
 import time
 import platform
 from concurrent.futures import ThreadPoolExecutor
+import argparse
 
 previous_states = {}
 
@@ -42,18 +43,35 @@ def ping(host):
 
 if __name__ == "__main__":
 
-    targets = ["1.1.1.1",
-               "8.8.8.8",
-               "192.168.1.1"]
+    parser = argparse.ArgumentParser(description="A multi-threaded continuous network monitor.")
+    
+    parser.add_argument(
+        "--targets", 
+        nargs="+",  
+        default=["1.1.1.1", "8.8.8.8", "192.168.1.1"],
+        help="List of IP addresses or domains to ping"
+    )
+    
+    parser.add_argument(
+        "--interval", 
+        type=int, 
+        default=10, 
+        help="Time in seconds to wait between check cycles"
+    )
+    
+    args = parser.parse_args()
+    
+    targets = args.targets
+    CHECK_INTERVAL = args.interval
 
-    print(f"Starting network monitor for {len(targets)} targets...\n")
+    print(f"Starting network monitor for {len(targets)} targets (interval: {CHECK_INTERVAL}s).\n")
 
     try:
         while True:
             print(f"\n Starting check cycle at {datetime.datetime.now().strftime('%H:%M:%S')}")
             with ThreadPoolExecutor(max_workers=5) as executor:
                 executor.map(ping, targets)
-            time.sleep(10)
+            time.sleep(CHECK_INTERVAL)
             
     except KeyboardInterrupt:
         print("\nNetwork monitor stopped by the user.")
